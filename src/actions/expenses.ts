@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { deleteStoredFile } from "@/lib/storage";
+import { touchLastActiveVehicle } from "@/lib/last-active-vehicle";
 import {
   expenseDataSchema,
   type ExpenseData,
@@ -34,7 +35,7 @@ export async function createExpense(
   vehicleId: string,
   values: ExpenseFormParsed
 ): Promise<{ error?: string; id?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = expenseDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -49,6 +50,7 @@ export async function createExpense(
   const expense = await prisma.expense.create({
     data: { vehicleId, ...toExpenseData(parseResult.data) },
   });
+  await touchLastActiveVehicle(user.id, vehicleId);
 
   revalidatePath(`/vehicles/${vehicleId}`);
   return { id: expense.id };
@@ -58,7 +60,7 @@ export async function updateExpense(
   id: string,
   values: ExpenseFormParsed
 ): Promise<{ error?: string; id?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = expenseDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -74,6 +76,7 @@ export async function updateExpense(
     where: { id },
     data: toExpenseData(parseResult.data),
   });
+  await touchLastActiveVehicle(user.id, existing.vehicleId);
 
   revalidatePath(`/vehicles/${existing.vehicleId}`);
   return { id };

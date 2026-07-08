@@ -9,20 +9,30 @@ import {
 export const expenseCategoryValues = [
   "MAINTENANCE",
   "REPAIR",
+  "MOD",
   "INSURANCE",
   "REGISTRATION",
   "PARKING_TOLLS",
   "ACCESSORIES",
+  "DETAILING",
+  "TIRES",
   "OTHER",
 ] as const;
 
+// Display order/labels for the user-facing category list. The MAINTENANCE
+// enum key is unchanged (including where markCompleted logs a linked
+// expense) - only its human-readable label changed from "Maintenance" to
+// "Service".
 export const expenseCategoryOptions = [
-  { value: "MAINTENANCE", label: "Maintenance" },
+  { value: "MAINTENANCE", label: "Service" },
   { value: "REPAIR", label: "Repair" },
+  { value: "MOD", label: "Mod" },
   { value: "INSURANCE", label: "Insurance" },
   { value: "REGISTRATION", label: "Registration" },
   { value: "PARKING_TOLLS", label: "Parking & Tolls" },
   { value: "ACCESSORIES", label: "Accessories" },
+  { value: "DETAILING", label: "Detailing" },
+  { value: "TIRES", label: "Tires" },
   { value: "OTHER", label: "Other" },
 ] satisfies { value: (typeof expenseCategoryValues)[number]; label: string }[];
 

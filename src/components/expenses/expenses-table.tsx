@@ -43,6 +43,15 @@ const categoryLabels: Record<string, string> = Object.fromEntries(
   expenseCategoryOptions.map((option) => [option.value, option.label])
 );
 
+// Passed as Select's `items` prop so the trigger shows the right label
+// immediately, without requiring the popup to have been opened at least
+// once first (Base UI only resolves Select.Value's label from the popup's
+// mounted items unless `items` is provided).
+const categoryFilterItems = [
+  { value: "ALL", label: "All categories" },
+  ...expenseCategoryOptions,
+];
+
 export function ExpensesTable({
   vehicleId,
   expenses,
@@ -61,6 +70,7 @@ export function ExpensesTable({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-end">
         <Select
+          items={categoryFilterItems}
           value={categoryFilter}
           onValueChange={(value) => setCategoryFilter(value ?? "ALL")}
         >
@@ -83,7 +93,7 @@ export function ExpensesTable({
           No expenses match this filter.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>

@@ -37,6 +37,11 @@ export interface MaintenanceStatusResult {
   dueAtDate: Date | null;
   milesRemaining: number | null;
   daysRemaining: number | null;
+  /** How far along the item is toward being due, as a 0-1 fraction (clamped) -
+   * the larger of the mileage-based and time-based fraction, whichever is
+   * closer to due. 1 means due/overdue. Use for a progress bar next to the
+   * status badge; the badge/status above still carries the actual semantics. */
+  progress: number;
 }
 
 export function computeMaintenanceStatus(
@@ -79,5 +84,26 @@ export function computeMaintenanceStatus(
     status = "DUE_SOON";
   }
 
-  return { status, dueAtOdometer, dueAtDate, milesRemaining, daysRemaining };
+  // Progress toward due, as a fraction: mileage-based (elapsed / interval)
+  // and time-based (elapsed / interval), taking whichever is larger (i.e.
+  // closer to due). Clamped to 0-1 so overdue items still read as a "full"
+  // bar rather than overflowing.
+  const milesFraction =
+    item.intervalMiles != null
+      ? (currentOdometer - baselineOdometer) / item.intervalMiles
+      : null;
+  const daysFraction =
+    dueAtDate != null && baselineDate != null && item.intervalMonths != null
+      ? (now.getTime() - baselineDate.getTime()) /
+        (dueAtDate.getTime() - baselineDate.getTime())
+      : null;
+  const rawProgress = Math.max(
+    milesFraction ?? Number.NEGATIVE_INFINITY,
+    daysFraction ?? Number.NEGATIVE_INFINITY
+  );
+  const progress = Number.isFinite(rawProgress)
+    ? Math.min(1, Math.max(0, rawProgress))
+    : 0;
+
+  return { status, dueAtOdometer, dueAtDate, milesRemaining, daysRemaining, progress };
 }

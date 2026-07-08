@@ -174,7 +174,11 @@ export function ExpenseDialog({ vehicleId, expense }: ExpenseDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      items={expenseCategoryOptions}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue />

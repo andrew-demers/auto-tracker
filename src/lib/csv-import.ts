@@ -274,6 +274,23 @@ export interface ImportedExpenseRow {
   notes: string | null;
 }
 
+/**
+ * Free-text aliases for category values that don't match an enum key
+ * directly (either because the enum key differs from its display label, e.g.
+ * MAINTENANCE displays as "Service", or because of common synonyms/spelling
+ * variants). Checked after the direct-match attempt below.
+ */
+const CATEGORY_ALIASES: Record<string, ExpenseCategoryValue> = {
+  SERVICE: "MAINTENANCE",
+  MOD: "MOD",
+  MODIFICATION: "MOD",
+  MODIFICATIONS: "MOD",
+  DETAILING: "DETAILING",
+  DETAIL: "DETAILING",
+  TIRES: "TIRES",
+  TYRES: "TIRES",
+};
+
 export function buildExpenseRow(
   values: Record<string, string | undefined>,
   dateFormat: DateFormatOption
@@ -288,7 +305,7 @@ export function buildExpenseRow(
   const normalizedCategory = categoryRaw.toUpperCase().replace(/[\s-]+/g, "_");
   const category = (expenseCategoryValues as readonly string[]).includes(normalizedCategory)
     ? (normalizedCategory as ExpenseCategoryValue)
-    : "OTHER";
+    : (CATEGORY_ALIASES[normalizedCategory] ?? "OTHER");
 
   const cost = parseImportNumber(values.cost);
   if (cost === null || cost < 0) {
