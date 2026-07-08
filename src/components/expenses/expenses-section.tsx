@@ -2,6 +2,7 @@ import { Receipt } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
 import { ExpenseDialog } from "@/components/expenses/expense-dialog-lazy";
+import { ExpenseCategoryBreakdown } from "@/components/expenses/expense-category-breakdown";
 import { ExpensesTable } from "@/components/expenses/expenses-table";
 import { getExpenses } from "@/actions/expenses";
 
@@ -24,7 +25,10 @@ export async function ExpensesSection({ vehicleId }: { vehicleId: string }) {
           description="Log insurance, repairs, registration, and other costs here."
         />
       ) : (
-        <ExpensesTable vehicleId={vehicleId} expenses={expenses} />
+        <>
+          <ExpenseCategoryBreakdown expenses={expenses} />
+          <ExpensesTable vehicleId={vehicleId} expenses={expenses} />
+        </>
       )}
     </div>
   );

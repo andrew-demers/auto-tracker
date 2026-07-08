@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Pencil, Wrench, Gauge, TrendingUp, DollarSign, Route } from "lucide-react";
+import { ArrowLeft, Pencil, Wrench, Gauge, TrendingUp, DollarSign, Route, Fuel } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -156,6 +156,19 @@ export default async function VehicleDetailPage({
                   <p className="text-xs text-muted-foreground">Average MPG</p>
                   <p className="text-lg font-semibold">
                     {formatMpg(overviewStats.avgMpg)}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="flex items-center gap-3 py-5">
+                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <Fuel className="size-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Fuel spend</p>
+                  <p className="text-lg font-semibold">
+                    {formatUsd(overviewStats.fuelSpend)}
                   </p>
                 </div>
               </CardContent>

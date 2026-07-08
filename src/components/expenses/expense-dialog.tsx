@@ -14,6 +14,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -44,11 +45,17 @@ import {
   type ExpenseFormParsed,
   type ExpenseFormValues,
 } from "@/lib/validations/expense";
+import {
+  CUSTOM_MAINTENANCE_TITLE,
+  isMaintenancePreset,
+  maintenancePresets,
+} from "@/lib/validations/maintenance";
 
 export interface ExpenseDialogDefaults {
   id: string;
   date: string;
   category: ExpenseCategoryValue;
+  type: string;
   odometer: string;
   cost: string;
   vendor: string;
@@ -60,16 +67,34 @@ interface ExpenseDialogProps {
   expense?: ExpenseDialogDefaults;
 }
 
+// Reuses the maintenance procedure preset list so a MAINTENANCE expense's
+// "type" (e.g. "Oil Change") lines up with the same names used on the
+// maintenance tab.
+const typeSelectItems = [
+  ...maintenancePresets.map((preset) => ({ value: preset, label: preset })),
+  { value: CUSTOM_MAINTENANCE_TITLE, label: "Custom..." },
+];
+
+/** "Custom..." unless the type is a recognized preset. */
+function initialTypeSelection(type: string | undefined): string {
+  if (type && isMaintenancePreset(type)) return type;
+  return CUSTOM_MAINTENANCE_TITLE;
+}
+
 export function ExpenseDialog({ vehicleId, expense }: ExpenseDialogProps) {
   const isEditing = Boolean(expense);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [typeSelection, setTypeSelection] = useState(() =>
+    initialTypeSelection(expense?.type)
+  );
 
   const defaultValues: ExpenseFormValues = {
     date: expense?.date ?? format(new Date(), "yyyy-MM-dd"),
     category: expense?.category ?? "MAINTENANCE",
+    type: expense?.type ?? "",
     odometer: expense?.odometer ?? "",
     cost: expense?.cost ?? "",
     vendor: expense?.vendor ?? "",
@@ -82,11 +107,13 @@ export function ExpenseDialog({ vehicleId, expense }: ExpenseDialogProps) {
     resolver: zodResolver(expenseFormSchema),
     defaultValues,
   });
+  const category = form.watch("category");
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) {
       form.reset(defaultValues);
+      setTypeSelection(initialTypeSelection(expense?.type));
       setServerError(null);
       setFile(null);
     }
@@ -177,7 +204,13 @@ export function ExpenseDialog({ vehicleId, expense }: ExpenseDialogProps) {
                     <Select
                       items={expenseCategoryOptions}
                       value={field.value}
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        if (value !== "MAINTENANCE") {
+                          setTypeSelection(CUSTOM_MAINTENANCE_TITLE);
+                          form.setValue("type", "");
+                        }
+                      }}
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -196,6 +229,55 @@ export function ExpenseDialog({ vehicleId, expense }: ExpenseDialogProps) {
                   </FormItem>
                 )}
               />
+              {category === "MAINTENANCE" ? (
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select
+                        items={typeSelectItems}
+                        value={typeSelection}
+                        onValueChange={(rawValue) => {
+                          const value = rawValue ?? CUSTOM_MAINTENANCE_TITLE;
+                          setTypeSelection(value);
+                          if (value === CUSTOM_MAINTENANCE_TITLE) {
+                            field.onChange(isMaintenancePreset(field.value ?? "") ? "" : field.value);
+                          } else {
+                            field.onChange(value);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {maintenancePresets.map((preset) => (
+                            <SelectItem key={preset} value={preset}>
+                              {preset}
+                            </SelectItem>
+                          ))}
+                          <SelectSeparator />
+                          <SelectItem value={CUSTOM_MAINTENANCE_TITLE}>Custom...</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {typeSelection === CUSTOM_MAINTENANCE_TITLE ? (
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. Oil change"
+                            className="mt-2"
+                            {...field}
+                          />
+                        </FormControl>
+                      ) : null}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : null}
               <FormField
                 control={form.control}
                 name="cost"
