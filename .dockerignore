@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+/data
+.remember
+.DS_Store
+npm-debug.log*
+README.md
+plans
+AGENTS.md
+CLAUDE.md

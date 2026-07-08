@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    image: auto-tracker:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Single named volume mounted at /data covers both the SQLite database
+      # file and the uploads directory. On Unraid, replace this with a bind
+      # mount to /mnt/user/appdata/auto-tracker instead - see README.
+      - auto-tracker-data:/data
+    environment:
+      DATABASE_URL: file:/data/auto-tracker.db
+      UPLOADS_DIR: /data/uploads
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required - generate one with `openssl rand -base64 32`}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      NOTIFICATIONS_ENABLED: ${NOTIFICATIONS_ENABLED:-false}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      BACKUP_RETENTION_COUNT: ${BACKUP_RETENTION_COUNT:-14}
+      # Unraid's default "nobody:users" - override to match your host if needed.
+      PUID: ${PUID:-99}
+      PGID: ${PGID:-100}
+
+volumes:
+  auto-tracker-data:
