@@ -32,11 +32,20 @@ USER_NAME="$(getent passwd "$PUID" | cut -d: -f1)"
 mkdir -p "$DB_DIR" "$UPLOADS_DIR"
 chown -R "$PUID:$PGID" /data
 
+# Drop from root to the resolved user for a command, preserving arguments
+# (including ones with spaces) via busybox su's positional-arg passthrough.
+# Avoids depending on the su-exec apk package (which requires a working
+# network path to Alpine's CDN at image-build time - not guaranteed on
+# every host/proxy setup) since busybox's su ships in the base image already.
+run_as_user() {
+  su -s /bin/sh "$USER_NAME" -c 'exec "$0" "$@"' -- "$@"
+}
+
 echo "[entrypoint] Running database migrations..."
-su-exec "$PUID:$PGID" node_modules/.bin/prisma migrate deploy
+run_as_user node_modules/.bin/prisma migrate deploy
 
 echo "[entrypoint] Seeding first admin user (no-op if users already exist)..."
-su-exec "$PUID:$PGID" node_modules/.bin/prisma db seed
+run_as_user node_modules/.bin/prisma db seed
 
 echo "[entrypoint] Starting Auto Tracker as $USER_NAME ($PUID:$PGID)..."
-exec su-exec "$PUID:$PGID" "$@"
+exec su -s /bin/sh "$USER_NAME" -c 'exec "$0" "$@"' -- "$@"
