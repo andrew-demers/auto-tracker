@@ -36,8 +36,6 @@ docker compose logs app | grep -A4 "first admin account"
 
 Sign in with those credentials, then change the password from **Settings > Profile**. See [First login](#first-login) below for details.
 
-> **Building behind a corporate/TLS-inspecting proxy?** If `docker compose up -d` (or `docker build`) fails with `apk`/`npm` errors like `TLS: server certificate not trusted`, see [`certs/README.md`](./certs) - drop your organization's root CA `.crt`/`.pem` file in `certs/` and rebuild.
-
 ## Quick start (local dev, no Docker)
 
 ```bash
