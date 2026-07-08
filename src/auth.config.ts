@@ -4,6 +4,10 @@ import type { UserRole } from "@/generated/prisma/client";
 // Edge-safe auth config (no Prisma/bcrypt here) shared by middleware and the
 // full auth.ts. The Credentials provider itself is only added in auth.ts.
 export const authConfig = {
+  // Self-hosted behind arbitrary hostnames/reverse proxies (Unraid, etc.) -
+  // there's no fixed set of trusted hosts like on Vercel, so trust whatever
+  // Host header the proxy forwards. Standard for self-hosted Auth.js apps.
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
