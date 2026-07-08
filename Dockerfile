@@ -88,5 +88,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p /data
 
 EXPOSE 3000
 
+# /api/health pings the DB and is excluded from proxy.ts's auth check, so this
+# reflects the app actually being able to serve requests, not just the
+# process being alive. wget is busybox's, already in the base alpine image.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "server.js"]
