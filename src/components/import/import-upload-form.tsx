@@ -22,6 +22,16 @@ import type { ImportDataType } from "@/lib/csv-import";
 
 export const IMPORT_SESSION_KEY = "auto-tracker-import";
 
+// Passed as Select's `items` prop so each trigger shows the right label
+// immediately, without requiring the popup to have been opened at least once
+// first (Base UI only resolves SelectValue's label from the popup's mounted
+// items unless `items` is provided) - see maintenance-dialog.tsx for the
+// same pattern.
+const dataTypeSelectItems = [
+  { value: "FUEL", label: "Fuel logs" },
+  { value: "EXPENSE", label: "Expenses" },
+];
+
 interface VehicleOption {
   id: string;
   name: string;
@@ -34,6 +44,10 @@ export function ImportUploadForm({ vehicles }: { vehicles: VehicleOption[] }) {
   const [dataType, setDataType] = useState<ImportDataType>("FUEL");
   const [vehicleId, setVehicleId] = useState<string>(vehicles[0]?.id ?? "");
   const [file, setFile] = useState<File | null>(null);
+  const vehicleSelectItems = vehicles.map((vehicle) => ({
+    value: vehicle.id,
+    label: vehicle.name,
+  }));
 
   if (vehicles.length === 0) {
     return (
@@ -103,7 +117,11 @@ export function ImportUploadForm({ vehicles }: { vehicles: VehicleOption[] }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="import-data-type">Data type</Label>
-              <Select value={dataType} onValueChange={(v) => setDataType(v as ImportDataType)}>
+              <Select
+                items={dataTypeSelectItems}
+                value={dataType}
+                onValueChange={(v) => setDataType(v as ImportDataType)}
+              >
                 <SelectTrigger id="import-data-type" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -115,7 +133,11 @@ export function ImportUploadForm({ vehicles }: { vehicles: VehicleOption[] }) {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="import-vehicle">Vehicle</Label>
-              <Select value={vehicleId} onValueChange={(v) => setVehicleId(v ?? "")}>
+              <Select
+                items={vehicleSelectItems}
+                value={vehicleId}
+                onValueChange={(v) => setVehicleId(v ?? "")}
+              >
                 <SelectTrigger id="import-vehicle" className="w-full">
                   <SelectValue />
                 </SelectTrigger>

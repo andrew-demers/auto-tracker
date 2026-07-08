@@ -1,7 +1,7 @@
 import { Receipt } from "lucide-react";
 
 import { EmptyState } from "@/components/empty-state";
-import { ExpenseDialog } from "@/components/expenses/expense-dialog";
+import { ExpenseDialog } from "@/components/expenses/expense-dialog-lazy";
 import { ExpensesTable } from "@/components/expenses/expenses-table";
 import { getExpenses } from "@/actions/expenses";
 
