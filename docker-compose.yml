@@ -8,6 +8,10 @@ services:
     # build: .
     pull_policy: always
     restart: unless-stopped
+    # Opt this container into Watchtower's updates without Watchtower touching
+    # every other container on the box - see README's Watchtower setup.
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "3000:3000"
     volumes:
