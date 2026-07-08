@@ -19,18 +19,18 @@ export const expenseCategoryValues = [
   "OTHER",
 ] as const;
 
-// Display order/labels for the user-facing category list.
+// Display order/labels for the user-facing category list - alphabetical by label.
 export const expenseCategoryOptions = [
-  { value: "MAINTENANCE", label: "Maintenance" },
-  { value: "REPAIR", label: "Repair" },
-  { value: "MOD", label: "Mod" },
-  { value: "INSURANCE", label: "Insurance" },
-  { value: "REGISTRATION", label: "Registration" },
-  { value: "PARKING_TOLLS", label: "Parking & Tolls" },
   { value: "ACCESSORIES", label: "Accessories" },
   { value: "DETAILING", label: "Detailing" },
-  { value: "TIRES", label: "Tires" },
+  { value: "INSURANCE", label: "Insurance" },
+  { value: "MAINTENANCE", label: "Maintenance" },
+  { value: "MOD", label: "Mod" },
   { value: "OTHER", label: "Other" },
+  { value: "PARKING_TOLLS", label: "Parking & Tolls" },
+  { value: "REGISTRATION", label: "Registration" },
+  { value: "REPAIR", label: "Repair" },
+  { value: "TIRES", label: "Tires" },
 ] satisfies { value: (typeof expenseCategoryValues)[number]; label: string }[];
 
 export const expenseFormSchema = z.object({
