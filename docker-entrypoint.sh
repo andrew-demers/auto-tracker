@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# prisma's seed step shells out to `tsx` by name (see prisma.config.ts) -
+# node_modules/.bin isn't on PATH by default, which makes that spawn fail
+# with ENOENT even though migrations (invoked via a direct relative path)
+# succeed.
+export PATH="/app/node_modules/.bin:$PATH"
+
 # Defaults match Unraid's "nobody:users" (99:100) - see the "Running on
 # Unraid" section of the README for why that matters for bind-mounted
 # appdata paths.
