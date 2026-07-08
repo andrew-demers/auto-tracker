@@ -78,6 +78,11 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
+# Generated Prisma client (schema.prisma's custom output path) - the
+# standalone server already has its own copy via Next's build tracing, but
+# prisma/seed.ts runs outside that bundle via tsx and imports this directly.
+COPY --from=builder /app/src/generated ./src/generated
+
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p /data
 
