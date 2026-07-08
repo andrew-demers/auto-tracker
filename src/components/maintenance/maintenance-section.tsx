@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { Wrench } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Progress, ProgressIndicator, ProgressTrack } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -39,6 +40,34 @@ function StatusBadge({ status }: { status: MaintenanceStatus }) {
     >
       OK
     </Badge>
+  );
+}
+
+/** Same green/amber/red semantics as StatusBadge, applied to the progress fill. */
+function statusProgressColor(status: MaintenanceStatus): string {
+  if (status === "OVERDUE") return "bg-destructive";
+  if (status === "DUE_SOON") return "bg-[#92600a] dark:bg-[#f0a83c]";
+  return "bg-[#1a7a34] dark:bg-[#3ecf66]";
+}
+
+function MaintenanceProgressBar({
+  status,
+  progress,
+}: {
+  status: MaintenanceStatus;
+  progress: number;
+}) {
+  const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  return (
+    <Progress
+      value={percent}
+      className="w-28"
+      aria-label={`${percent}% of the way to due`}
+    >
+      <ProgressTrack>
+        <ProgressIndicator className={statusProgressColor(status)} />
+      </ProgressTrack>
+    </Progress>
   );
 }
 
@@ -86,7 +115,7 @@ export async function MaintenanceSection({ vehicleId }: { vehicleId: string }) {
           description="Add an oil change, tire rotation, or other interval-based reminder."
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -105,7 +134,10 @@ export async function MaintenanceSection({ vehicleId }: { vehicleId: string }) {
                   <TableCell className="whitespace-nowrap">{formatInterval(item)}</TableCell>
                   <TableCell className="whitespace-nowrap">{formatLastDone(item)}</TableCell>
                   <TableCell>
-                    <StatusBadge status={item.status} />
+                    <div className="flex flex-col gap-1.5">
+                      <StatusBadge status={item.status} />
+                      <MaintenanceProgressBar status={item.status} progress={item.progress} />
+                    </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{formatDue(item)}</TableCell>
                   <TableCell>

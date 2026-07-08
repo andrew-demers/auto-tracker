@@ -162,7 +162,7 @@ export function ImportMapWizard() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {results.skipped.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -226,7 +226,7 @@ export function ImportMapWizard() {
             </Select>
           </div>
 
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-x-auto rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -300,7 +300,7 @@ export function ImportMapWizard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-x-auto rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>

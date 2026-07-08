@@ -16,6 +16,7 @@ import { FuelUpsSection } from "@/components/fuel-ups/fuel-ups-section";
 import { ExpensesSection } from "@/components/expenses/expenses-section";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
 import { CostOverTimeChart, MpgTrendChart } from "@/components/vehicles/vehicle-overview-charts";
+import { VehicleSpecsSection } from "@/components/vehicles/vehicle-specs-section";
 import { getVehicle, getVehicleOverviewStats } from "@/actions/vehicles";
 import { formatMiles, formatMpg, formatUsd } from "@/lib/units";
 
@@ -27,7 +28,7 @@ const fuelTypeLabels: Record<string, string> = {
   OTHER: "Other",
 };
 
-const validTabs = ["overview", "fuel-ups", "expenses", "maintenance"] as const;
+const validTabs = ["overview", "fuel-ups", "expenses", "maintenance", "specs"] as const;
 
 export default async function VehicleDetailPage({
   params,
@@ -111,6 +112,7 @@ export default async function VehicleDetailPage({
           <TabsTrigger value="fuel-ups">Fuel-ups</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+          <TabsTrigger value="specs">Specs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
@@ -251,6 +253,31 @@ export default async function VehicleDetailPage({
 
         <TabsContent value="maintenance" className="mt-4">
           <MaintenanceSection vehicleId={vehicle.id} />
+        </TabsContent>
+
+        <TabsContent value="specs" className="mt-4">
+          <VehicleSpecsSection
+            vehicleId={vehicle.id}
+            specs={{
+              vin: vehicle.vin,
+              licensePlate: vehicle.licensePlate,
+              oilType: vehicle.oilType,
+              oilCapacityQuarts: vehicle.oilCapacityQuarts,
+              oilFilterPartNumber: vehicle.oilFilterPartNumber,
+              tireSize: vehicle.tireSize,
+              tireSizeRear: vehicle.tireSizeRear,
+              tirePressureFrontPsi: vehicle.tirePressureFrontPsi,
+              tirePressureRearPsi: vehicle.tirePressureRearPsi,
+              transmissionFluidType: vehicle.transmissionFluidType,
+              transmissionFluidCapacityQuarts: vehicle.transmissionFluidCapacityQuarts,
+              brakeFluidType: vehicle.brakeFluidType,
+              coolantType: vehicle.coolantType,
+              batteryType: vehicle.batteryType,
+              sparkPlugType: vehicle.sparkPlugType,
+              wiperBladeSizeFront: vehicle.wiperBladeSizeFront,
+              wiperBladeSizeRear: vehicle.wiperBladeSizeRear,
+            }}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -10,6 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,7 +36,10 @@ import {
 } from "@/components/ui/form";
 import { createMaintenanceItem, updateMaintenanceItem } from "@/actions/maintenance";
 import {
+  CUSTOM_MAINTENANCE_TITLE,
+  isMaintenancePreset,
   maintenanceFormSchema,
+  maintenancePresets,
   type MaintenanceFormParsed,
   type MaintenanceFormValues,
 } from "@/lib/validations/maintenance";
@@ -49,11 +60,29 @@ interface MaintenanceDialogProps {
   item?: MaintenanceDialogDefaults;
 }
 
+// Passed as Select's `items` prop so the trigger shows the right label (e.g.
+// "Custom...") immediately, without requiring the popup to have been opened
+// at least once first (Base UI only resolves Select.Value's label from the
+// popup's mounted items unless `items` is provided).
+const titleSelectItems = [
+  ...maintenancePresets.map((preset) => ({ value: preset, label: preset })),
+  { value: CUSTOM_MAINTENANCE_TITLE, label: "Custom..." },
+];
+
+/** "Custom..." unless the title is a recognized preset. */
+function initialTitleSelection(title: string | undefined): string {
+  if (title && isMaintenancePreset(title)) return title;
+  return CUSTOM_MAINTENANCE_TITLE;
+}
+
 export function MaintenanceDialog({ vehicleId, item }: MaintenanceDialogProps) {
   const isEditing = Boolean(item);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [titleSelection, setTitleSelection] = useState(() =>
+    initialTitleSelection(item?.title)
+  );
 
   const defaultValues: MaintenanceFormValues = {
     title: item?.title ?? "",
@@ -76,6 +105,7 @@ export function MaintenanceDialog({ vehicleId, item }: MaintenanceDialogProps) {
     setOpen(next);
     if (next) {
       form.reset(defaultValues);
+      setTitleSelection(initialTitleSelection(item?.title));
       setServerError(null);
     }
   }
@@ -139,9 +169,43 @@ export function MaintenanceDialog({ vehicleId, item }: MaintenanceDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Oil change" {...field} />
-                  </FormControl>
+                  <Select
+                    items={titleSelectItems}
+                    value={titleSelection}
+                    onValueChange={(rawValue) => {
+                      const value = rawValue ?? CUSTOM_MAINTENANCE_TITLE;
+                      setTitleSelection(value);
+                      if (value === CUSTOM_MAINTENANCE_TITLE) {
+                        field.onChange(isMaintenancePreset(field.value) ? "" : field.value);
+                      } else {
+                        field.onChange(value);
+                      }
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a procedure" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {maintenancePresets.map((preset) => (
+                        <SelectItem key={preset} value={preset}>
+                          {preset}
+                        </SelectItem>
+                      ))}
+                      <SelectSeparator />
+                      <SelectItem value={CUSTOM_MAINTENANCE_TITLE}>Custom...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {titleSelection === CUSTOM_MAINTENANCE_TITLE ? (
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Oil change"
+                        className="mt-2"
+                        {...field}
+                      />
+                    </FormControl>
+                  ) : null}
                   <FormMessage />
                 </FormItem>
               )}

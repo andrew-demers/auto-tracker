@@ -7,6 +7,41 @@ import {
   dateField,
 } from "./shared";
 
+/**
+ * Common maintenance procedure names shown as quick-pick options in the
+ * title select. The underlying `title` field stays a plain free-text string
+ * in the schema/DB - this list is purely a UI convenience. Any title matching
+ * one of these strings selects that preset; anything else falls back to the
+ * "Custom..." option (see CUSTOM_MAINTENANCE_TITLE below).
+ */
+export const maintenancePresets = [
+  "Oil Change",
+  "Tire Rotation",
+  "Tire Replacement",
+  "Brake Pad Replacement",
+  "Brake Fluid Flush",
+  "Air Filter Replacement",
+  "Cabin Air Filter Replacement",
+  "Battery Replacement",
+  "Coolant Flush",
+  "Transmission Fluid Change",
+  "Spark Plug Replacement",
+  "Timing Belt Replacement",
+  "Serpentine Belt Replacement",
+  "Wiper Blade Replacement",
+  "Wheel Alignment",
+  "State Inspection",
+  "Power Steering Fluid Change",
+  "Fuel Filter Replacement",
+] as const;
+
+/** Sentinel select value for "Custom..." - never a real title, just a UI marker. */
+export const CUSTOM_MAINTENANCE_TITLE = "__custom__";
+
+export function isMaintenancePreset(title: string): boolean {
+  return (maintenancePresets as readonly string[]).includes(title);
+}
+
 const intervalRefinement = <
   T extends { intervalMiles?: number; intervalMonths?: number },
 >(
