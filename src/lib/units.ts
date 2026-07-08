@@ -51,6 +51,18 @@ export function formatUsdPerGallon(value: number | null | undefined): string {
   return `${usdPerUnitFormatter.format(value)}/gal`;
 }
 
+export function formatUsdPerMile(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "-";
+  return `${usdPerUnitFormatter.format(value)}/mi`;
+}
+
+/** More decimal precision than formatUsd - for small running averages like
+ * cost-per-day, where rounding to whole cents loses too much signal. */
+export function formatUsdPrecise(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return "-";
+  return usdPerUnitFormatter.format(value);
+}
+
 export function formatBytes(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "-";
   if (value < 1024) return `${value} B`;
