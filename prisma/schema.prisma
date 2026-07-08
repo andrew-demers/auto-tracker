@@ -1,0 +1,160 @@
+// Auto Tracker - Prisma schema
+// See plans/2026-07-07-mileage-tracker-mvp.md for the full spec.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String
+  role          UserRole @default(USER)
+  notifyEnabled Boolean  @default(true) // receive maintenance due/overdue emails
+  createdAt     DateTime @default(now())
+}
+
+enum FuelType {
+  GASOLINE
+  DIESEL
+  HYBRID
+  ELECTRIC
+  OTHER
+}
+
+model Vehicle {
+  id               String            @id @default(cuid())
+  name             String
+  make             String?
+  model            String?
+  year             Int?
+  fuelType         FuelType          @default(GASOLINE)
+  tankCapacity     Float? // gallons
+  photoUrl         String?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  fuelUps          FuelUp[]
+  expenses         Expense[]
+  maintenanceItems MaintenanceItem[]
+}
+
+model FuelUp {
+  id             String       @id @default(cuid())
+  vehicleId      String
+  vehicle        Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  date           DateTime
+  odometer       Float // miles
+  gallons        Float
+  pricePerGallon Float
+  totalCost      Float
+  isFullTank     Boolean      @default(true)
+  station        String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  attachments    Attachment[]
+
+  @@index([vehicleId, date])
+}
+
+enum ExpenseCategory {
+  MAINTENANCE
+  REPAIR
+  INSURANCE
+  REGISTRATION
+  PARKING_TOLLS
+  ACCESSORIES
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  date        DateTime
+  category    ExpenseCategory
+  odometer    Float?
+  cost        Float
+  vendor      String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  attachments Attachment[]
+
+  @@index([vehicleId, date])
+}
+
+model MaintenanceItem {
+  id                 String    @id @default(cuid())
+  vehicleId          String
+  vehicle            Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  title              String
+  intervalMiles      Int?
+  intervalMonths     Int?
+  lastDoneDate       DateTime?
+  lastDoneOdometer   Float?
+  notes              String?
+  notifyEnabled      Boolean   @default(true)
+  lastNotifiedStatus String? // "DUE_SOON" | "OVERDUE" | null - last status an email was sent for
+  lastNotifiedAt     DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([vehicleId])
+}
+
+enum AttachmentOwnerType {
+  FUEL_UP
+  EXPENSE
+}
+
+model Attachment {
+  id         String              @id @default(cuid())
+  ownerType  AttachmentOwnerType
+  fuelUpId   String?
+  fuelUp     FuelUp?             @relation(fields: [fuelUpId], references: [id], onDelete: Cascade)
+  expenseId  String?
+  expense    Expense?            @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  filename   String // original filename shown to the user
+  storedPath String // path relative to the uploads root
+  mimeType   String
+  sizeBytes  Int
+  createdAt  DateTime            @default(now())
+
+  @@index([fuelUpId])
+  @@index([expenseId])
+}
+
+// Single-row table (id is always "singleton") holding the Google Drive connection.
+model BackupIntegration {
+  id                    String    @id @default("singleton")
+  googleAccountEmail    String?
+  googleRefreshTokenEnc String? // AES-256-GCM encrypted, keyed from AUTH_SECRET
+  driveFolderId         String? // cached id of the "Auto Tracker Backups" folder
+  connectedAt           DateTime?
+  updatedAt             DateTime  @updatedAt
+}
+
+enum BackupStatus {
+  SUCCESS
+  FAILED
+}
+
+model BackupRecord {
+  id           String       @id @default(cuid())
+  status       BackupStatus
+  sizeBytes    Int?
+  driveFileId  String?
+  errorMessage String?
+  createdAt    DateTime     @default(now())
+}
