@@ -15,6 +15,7 @@ function toExpenseData(parsed: ExpenseData) {
   return {
     date: parsed.date,
     category: parsed.category,
+    type: parsed.type ?? null,
     odometer: parsed.odometer ?? null,
     cost: parsed.cost,
     vendor: parsed.vendor ?? null,

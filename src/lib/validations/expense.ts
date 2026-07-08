@@ -19,12 +19,9 @@ export const expenseCategoryValues = [
   "OTHER",
 ] as const;
 
-// Display order/labels for the user-facing category list. The MAINTENANCE
-// enum key is unchanged (including where markCompleted logs a linked
-// expense) - only its human-readable label changed from "Maintenance" to
-// "Service".
+// Display order/labels for the user-facing category list.
 export const expenseCategoryOptions = [
-  { value: "MAINTENANCE", label: "Service" },
+  { value: "MAINTENANCE", label: "Maintenance" },
   { value: "REPAIR", label: "Repair" },
   { value: "MOD", label: "Mod" },
   { value: "INSURANCE", label: "Insurance" },
@@ -39,6 +36,7 @@ export const expenseCategoryOptions = [
 export const expenseFormSchema = z.object({
   date: dateField(),
   category: z.enum(expenseCategoryValues),
+  type: optionalTextField(200),
   odometer: optionalNumberField({
     min: 0,
     message: "Enter a valid odometer reading",
@@ -55,6 +53,7 @@ export type ExpenseCategoryValue = (typeof expenseCategoryValues)[number];
 export const expenseDataSchema = z.object({
   date: z.date(),
   category: z.enum(expenseCategoryValues),
+  type: z.string().max(200).optional(),
   odometer: z.number().min(0).optional(),
   cost: z.number().min(0),
   vendor: z.string().max(200).optional(),

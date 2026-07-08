@@ -51,6 +51,24 @@ export function buildMonthlyCostSeries(
   return [...buckets.values()].sort((a, b) => a.month.localeCompare(b.month));
 }
 
+export interface ExpenseCategoryTotal {
+  category: string;
+  total: number;
+}
+
+/** Sums expense cost by category, sorted highest spend first. Categories with no expenses are omitted. */
+export function buildExpenseCategoryBreakdown(
+  expenses: { category: string; cost: number }[]
+): ExpenseCategoryTotal[] {
+  const totals = new Map<string, number>();
+  for (const expense of expenses) {
+    totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.cost);
+  }
+  return [...totals.entries()]
+    .map(([category, total]) => ({ category, total }))
+    .sort((a, b) => b.total - a.total);
+}
+
 export interface MpgTrendPoint {
   date: Date;
   label: string;

@@ -32,6 +32,7 @@ export interface ExpenseRow {
   id: string;
   date: Date;
   category: ExpenseCategoryValue;
+  type: string | null;
   odometer: number | null;
   cost: number;
   vendor: string | null;
@@ -113,9 +114,16 @@ export function ExpensesTable({
                     {format(expense.date, "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">
-                      {categoryLabels[expense.category] ?? expense.category}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant="secondary" className="w-fit">
+                        {categoryLabels[expense.category] ?? expense.category}
+                      </Badge>
+                      {expense.type ? (
+                        <span className="text-xs text-muted-foreground">
+                          {expense.type}
+                        </span>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {expense.odometer != null ? formatMiles(expense.odometer) : "-"}
@@ -139,6 +147,7 @@ export function ExpensesTable({
                           id: expense.id,
                           date: format(expense.date, "yyyy-MM-dd"),
                           category: expense.category,
+                          type: expense.type ?? "",
                           odometer:
                             expense.odometer != null ? String(expense.odometer) : "",
                           cost: String(expense.cost),

@@ -110,6 +110,7 @@ model Expense {
   vehicle     Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   date        DateTime
   category    ExpenseCategory
+  type        String? // what it was, e.g. "Oil Change" for a MAINTENANCE expense
   odometer    Float?
   cost        Float
   vendor      String?
