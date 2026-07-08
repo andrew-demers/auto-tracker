@@ -21,6 +21,7 @@ export const maintenancePresets = [
   "Brake Pad Replacement",
   "Cabin Air Filter Replacement",
   "Coolant Flush",
+  "Differential Fluid Change",
   "Fuel Additive",
   "Fuel Filter Replacement",
   "Oil Change",
