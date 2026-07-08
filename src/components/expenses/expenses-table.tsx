@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/select";
 import { ExpenseDialog } from "@/components/expenses/expense-dialog-lazy";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
-import { AttachmentGrid } from "@/components/attachments/attachment-grid";
+import { ExpenseDetailDialog } from "@/components/expenses/expense-detail-dialog";
+import type { AttachmentRow } from "@/components/attachments/attachment-grid";
 import {
   expenseCategoryOptions,
   type ExpenseCategoryValue,
@@ -37,7 +38,7 @@ export interface ExpenseRow {
   cost: number;
   vendor: string | null;
   notes: string | null;
-  attachments: { id: string; filename: string; mimeType: string }[];
+  attachments: AttachmentRow[];
 }
 
 const categoryLabels: Record<string, string> = Object.fromEntries(
@@ -61,6 +62,7 @@ export function ExpensesTable({
   expenses: ExpenseRow[];
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+  const [detailExpense, setDetailExpense] = useState<ExpenseRow | null>(null);
 
   const filtered = useMemo(() => {
     if (categoryFilter === "ALL") return expenses;
@@ -100,30 +102,29 @@ export function ExpensesTable({
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Odometer</TableHead>
                 <TableHead>Cost</TableHead>
-                <TableHead>Vendor</TableHead>
-                <TableHead>Attachments</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((expense) => (
-                <TableRow key={expense.id}>
+                <TableRow
+                  key={expense.id}
+                  className="cursor-pointer"
+                  onClick={() => setDetailExpense(expense)}
+                >
                   <TableCell className="whitespace-nowrap">
                     {format(expense.date, "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <Badge variant="secondary" className="w-fit">
-                        {categoryLabels[expense.category] ?? expense.category}
-                      </Badge>
-                      {expense.type ? (
-                        <span className="text-xs text-muted-foreground">
-                          {expense.type}
-                        </span>
-                      ) : null}
-                    </div>
+                    <Badge variant="secondary" className="w-fit">
+                      {categoryLabels[expense.category] ?? expense.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
+                    {expense.type || "-"}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {expense.odometer != null ? formatMiles(expense.odometer) : "-"}
@@ -131,16 +132,11 @@ export function ExpensesTable({
                   <TableCell className="whitespace-nowrap">
                     {formatUsd(expense.cost)}
                   </TableCell>
-                  <TableCell>{expense.vendor || "-"}</TableCell>
                   <TableCell>
-                    <AttachmentGrid
-                      ownerType="EXPENSE"
-                      ownerId={expense.id}
-                      attachments={expense.attachments}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
+                    <div
+                      className="flex items-center justify-end gap-1"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <ExpenseDialog
                         vehicleId={vehicleId}
                         expense={{
@@ -164,6 +160,14 @@ export function ExpensesTable({
           </Table>
         </div>
       )}
+
+      <ExpenseDetailDialog
+        expense={detailExpense}
+        open={detailExpense !== null}
+        onOpenChange={(next) => {
+          if (!next) setDetailExpense(null);
+        }}
+      />
     </div>
   );
 }
