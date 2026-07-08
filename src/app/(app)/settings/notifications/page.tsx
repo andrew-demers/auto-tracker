@@ -24,26 +24,32 @@ export default function NotificationsSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
+          <div className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <p className="text-sm font-medium">SMTP server</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground break-words">
                 Configured via SMTP_HOST/SMTP_PORT/SMTP_USER/etc. environment
                 variables.
               </p>
             </div>
-            <Badge variant={smtpConfigured ? "secondary" : "outline"}>
+            <Badge
+              variant={smtpConfigured ? "secondary" : "outline"}
+              className="self-start sm:self-auto"
+            >
               {smtpConfigured ? "Configured" : "Not configured"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
+          <div className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <p className="text-sm font-medium">Daily reminder job</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground break-words">
                 Controlled via the NOTIFICATIONS_ENABLED environment variable.
               </p>
             </div>
-            <Badge variant={notificationsEnabled ? "secondary" : "outline"}>
+            <Badge
+              variant={notificationsEnabled ? "secondary" : "outline"}
+              className="self-start sm:self-auto"
+            >
               {notificationsEnabled ? "Enabled" : "Disabled"}
             </Badge>
           </div>

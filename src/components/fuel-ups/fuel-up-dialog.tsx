@@ -289,12 +289,6 @@ export function FuelUpDialog({
                         {...field}
                       />
                     </FormControl>
-                    {showOdometerWarning ? (
-                      <p className="text-xs text-amber-600 dark:text-amber-500">
-                        At or below the vehicle&apos;s current known odometer (
-                        {effectiveComparisonOdometer.toLocaleString()} mi).
-                      </p>
-                    ) : null}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -353,9 +347,6 @@ export function FuelUpDialog({
                         }}
                       />
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Auto-calculated from gallons x price - edit to override.
-                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -373,6 +364,17 @@ export function FuelUpDialog({
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="-mt-2 flex flex-col gap-1">
+              {showOdometerWarning ? (
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  Odometer is at or below the vehicle&apos;s current known odometer (
+                  {effectiveComparisonOdometer.toLocaleString()} mi).
+                </p>
+              ) : null}
+              <p className="text-xs text-muted-foreground">
+                Total cost is auto-calculated from gallons x price - edit it to override.
+              </p>
             </div>
 
             <FormField

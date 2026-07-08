@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ExpenseDialog } from "@/components/expenses/expense-dialog";
+import { ExpenseDialog } from "@/components/expenses/expense-dialog-lazy";
 import { DeleteExpenseButton } from "@/components/expenses/delete-expense-button";
 import { AttachmentGrid } from "@/components/attachments/attachment-grid";
 import {

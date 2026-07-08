@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Pencil, Fuel, Wrench, Gauge, TrendingUp, DollarSign, Route } from "lucide-react";
+import { ArrowLeft, Pencil, Wrench, Gauge, TrendingUp, DollarSign, Route } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { DeleteVehicleButton } from "@/components/vehicles/delete-vehicle-button
 import { FuelUpsSection } from "@/components/fuel-ups/fuel-ups-section";
 import { ExpensesSection } from "@/components/expenses/expenses-section";
 import { MaintenanceSection } from "@/components/maintenance/maintenance-section";
-import { CostOverTimeChart, MpgTrendChart } from "@/components/vehicles/vehicle-overview-charts";
+import { CostOverTimeChart, MpgTrendChart } from "@/components/vehicles/vehicle-overview-charts-lazy";
 import { VehicleSpecsSection } from "@/components/vehicles/vehicle-specs-section";
 import { getVehicle, getVehicleOverviewStats } from "@/actions/vehicles";
 import { formatMiles, formatMpg, formatUsd } from "@/lib/units";
@@ -135,23 +135,6 @@ export default async function VehicleDetailPage({
             <Card>
               <CardContent className="flex items-center gap-3 py-5">
                 <div className="flex size-10 items-center justify-center rounded-full bg-muted">
-                  <Fuel className="size-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    Tank capacity
-                  </p>
-                  <p className="text-lg font-semibold">
-                    {vehicle.tankCapacity
-                      ? `${vehicle.tankCapacity} gal`
-                      : "-"}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-3 py-5">
-                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
                   <Wrench className="size-5 text-muted-foreground" />
                 </div>
                 <div>
@@ -164,9 +147,6 @@ export default async function VehicleDetailPage({
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <Card>
               <CardContent className="flex items-center gap-3 py-5">
                 <div className="flex size-10 items-center justify-center rounded-full bg-muted">
@@ -261,6 +241,7 @@ export default async function VehicleDetailPage({
             specs={{
               vin: vehicle.vin,
               licensePlate: vehicle.licensePlate,
+              tankCapacity: vehicle.tankCapacity,
               oilType: vehicle.oilType,
               oilCapacityQuarts: vehicle.oilCapacityQuarts,
               oilFilterPartNumber: vehicle.oilFilterPartNumber,
