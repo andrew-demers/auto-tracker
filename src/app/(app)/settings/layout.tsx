@@ -11,6 +11,7 @@ export default async function SettingsLayout({
   const items = [
     { href: "/settings/profile", label: "Profile" },
     { href: "/settings/notifications", label: "Notifications" },
+    { href: "/settings/import", label: "Import" },
   ];
   if (user.role === "ADMIN") {
     items.push({ href: "/settings/users", label: "Users" });

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { deleteStoredFile } from "@/lib/storage";
+import { touchLastActiveVehicle } from "@/lib/last-active-vehicle";
 import {
   fuelUpDataSchema,
   type FuelUpData,
@@ -36,7 +37,7 @@ export async function createFuelUp(
   vehicleId: string,
   values: FuelUpFormParsed
 ): Promise<{ error?: string; id?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = fuelUpDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -51,6 +52,7 @@ export async function createFuelUp(
   const fuelUp = await prisma.fuelUp.create({
     data: { vehicleId, ...toFuelUpData(parseResult.data) },
   });
+  await touchLastActiveVehicle(user.id, vehicleId);
 
   revalidatePath(`/vehicles/${vehicleId}`);
   return { id: fuelUp.id };
@@ -60,7 +62,7 @@ export async function updateFuelUp(
   id: string,
   values: FuelUpFormParsed
 ): Promise<{ error?: string; id?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = fuelUpDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -76,6 +78,7 @@ export async function updateFuelUp(
     where: { id },
     data: toFuelUpData(parseResult.data),
   });
+  await touchLastActiveVehicle(user.id, existing.vehicleId);
 
   revalidatePath(`/vehicles/${existing.vehicleId}`);
   return { id };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -49,12 +50,14 @@ export function UserNav({ user }: { user: SessionUser }) {
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="flex flex-col">
-          <span className="font-medium">{displayName}</span>
-          <span className="text-xs font-normal text-muted-foreground">
-            {user.email}
-          </span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col">
+            <span className="font-medium">{displayName}</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              {user.email}
+            </span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <form action={signOutAction} className="px-1 pb-1">
           <button

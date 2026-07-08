@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { getCurrentOdometer } from "@/lib/odometer";
+import { touchLastActiveVehicle } from "@/lib/last-active-vehicle";
 import {
   computeMaintenanceStatus,
   type MaintenanceStatusResult,
@@ -90,7 +91,7 @@ export async function createMaintenanceItem(
   vehicleId: string,
   values: MaintenanceFormParsed
 ): Promise<{ error?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = maintenanceDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -105,6 +106,7 @@ export async function createMaintenanceItem(
   await prisma.maintenanceItem.create({
     data: { vehicleId, ...toMaintenanceData(parseResult.data) },
   });
+  await touchLastActiveVehicle(user.id, vehicleId);
 
   revalidatePath(`/vehicles/${vehicleId}`);
   return {};
@@ -114,7 +116,7 @@ export async function updateMaintenanceItem(
   id: string,
   values: MaintenanceFormParsed
 ): Promise<{ error?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = maintenanceDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -130,6 +132,7 @@ export async function updateMaintenanceItem(
     where: { id },
     data: toMaintenanceData(parseResult.data),
   });
+  await touchLastActiveVehicle(user.id, existing.vehicleId);
 
   revalidatePath(`/vehicles/${existing.vehicleId}`);
   return {};
@@ -159,7 +162,7 @@ export async function markCompleted(
   id: string,
   values: MarkCompletedFormParsed
 ): Promise<{ error?: string }> {
-  await requireUser();
+  const user = await requireUser();
 
   const parseResult = markCompletedDataSchema.safeParse(values);
   if (!parseResult.success) {
@@ -195,6 +198,7 @@ export async function markCompleted(
       });
     }
   });
+  await touchLastActiveVehicle(user.id, existing.vehicleId);
 
   revalidatePath(`/vehicles/${existing.vehicleId}`);
   return {};
