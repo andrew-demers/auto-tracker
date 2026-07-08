@@ -145,7 +145,7 @@ Auto Tracker is a single container with all state under one `/data` path, which 
 3. Set `PUID=99` and `PGID=100` (Unraid's `nobody:users`, which is also this image's default) so files written under the bind-mounted appdata path are owned by what Unraid expects.
 4. Point the container at the published image, `ghcr.io/<owner>/<repo>:latest` (see above), instead of building locally.
 5. Put the container behind whatever reverse proxy you already run (Nginx Proxy Manager, SWAG, Traefik, etc.), proxying to the container's port 3000. Set `APP_URL` to the exact public URL you proxy it behind (e.g. `https://auto-tracker.yourdomain.com`) - it's used both for the Google OAuth redirect URI and for links in notification emails, so it must match what you (and Google) actually hit.
-6. To auto-update whenever a new image is published (rather than manually re-pulling), install **Watchtower** from Unraid's Community Applications and point it at this container - see the [Watchtower documentation](https://containrrr.dev/watchtower/) for scheduling/scope options.
+6. To auto-update whenever a new image is published (rather than manually re-pulling), install **Watchtower** from Unraid's Community Applications and point it at this container - see the [Watchtower documentation](https://containrrr.dev/watchtower/) for scheduling/scope options. `docker-compose.yml` already carries the `com.centurylinklabs.watchtower.enable=true` label, so running Watchtower with `WATCHTOWER_LABEL_ENABLE=true` limits it to just this container instead of every container on the box.
 
 ## Learn more (Next.js)
 
