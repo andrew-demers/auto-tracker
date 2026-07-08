@@ -26,7 +26,7 @@ function StatusBadge({ status }: { status: MaintenanceStatus }) {
     return (
       <Badge
         variant="outline"
-        className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400"
+        className="border-[#f0d9a1] bg-[#fdf1da] text-[#92600a] dark:border-[rgba(245,166,35,0.32)] dark:bg-[rgba(245,166,35,0.14)] dark:text-[#f0a83c]"
       >
         Due soon
       </Badge>
@@ -35,7 +35,7 @@ function StatusBadge({ status }: { status: MaintenanceStatus }) {
   return (
     <Badge
       variant="outline"
-      className="border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-400"
+      className="border-[#bfe8c9] bg-[#e6f6ea] text-[#1a7a34] dark:border-[rgba(39,166,68,0.35)] dark:bg-[rgba(39,166,68,0.16)] dark:text-[#3ecf66]"
     >
       OK
     </Badge>
@@ -86,7 +86,7 @@ export async function MaintenanceSection({ vehicleId }: { vehicleId: string }) {
           description="Add an oil change, tire rotation, or other interval-based reminder."
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>

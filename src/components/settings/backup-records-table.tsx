@@ -26,7 +26,7 @@ export function BackupRecordsTable({ records }: { records: BackupRecord[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -47,7 +47,7 @@ export function BackupRecordsTable({ records }: { records: BackupRecord[] }) {
                 {record.status === "SUCCESS" ? (
                   <Badge
                     variant="outline"
-                    className="border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-400"
+                    className="border-[#bfe8c9] bg-[#e6f6ea] text-[#1a7a34] dark:border-[rgba(39,166,68,0.35)] dark:bg-[rgba(39,166,68,0.16)] dark:text-[#3ecf66]"
                   >
                     Success
                   </Badge>

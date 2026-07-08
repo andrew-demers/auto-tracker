@@ -5,7 +5,7 @@ export default function NewVehiclePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Add vehicle</h1>
+        <h1 className="text-[28px] font-semibold tracking-[-0.6px]">Add vehicle</h1>
         <p className="text-sm text-muted-foreground">
           Add a vehicle to the shared fleet.
         </p>
