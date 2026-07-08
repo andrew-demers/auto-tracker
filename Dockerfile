@@ -22,6 +22,13 @@ ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 FROM base AS deps
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
+# package.json's postinstall runs `prisma generate`, which needs the schema
+# present - copy just that (not the full source) so this layer still stays
+# cached across unrelated source changes. Other packages' own install
+# scripts (notably better-sqlite3's native addon build) still run normally -
+# only `prisma generate` itself needs the schema copied ahead of time.
+COPY prisma/schema.prisma ./prisma/schema.prisma
+COPY prisma.config.ts ./prisma.config.ts
 RUN npm ci
 
 # ---- builder: generate the Prisma client and build the Next.js app ----
