@@ -4,17 +4,28 @@
 # container (e.g. Unraid) with a persistent /data volume for the SQLite
 # database and uploaded receipts.
 
+# ---- base: shared setup for stages that hit the network (apk/npm) ----
+FROM node:20-alpine AS base
+WORKDIR /app
+# Optional corporate/proxy root CA for TLS-inspecting networks - drop a
+# .crt/.pem file in certs/ and it's trusted here before any apk/npm network
+# call runs. No-op if certs/ is empty (just the tracked README.md). See
+# certs/README.md for why this exists and how to use it.
+COPY certs/ /usr/local/share/ca-certificates/
+RUN for f in /usr/local/share/ca-certificates/*.crt /usr/local/share/ca-certificates/*.pem; do \
+      [ -f "$f" ] && cat "$f" >> /etc/ssl/certs/ca-certificates.crt; \
+    done; true
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+
 # ---- deps: install all dependencies (dev included - needed to compile
 #             better-sqlite3's native addon and to build the app) ----
-FROM node:20-alpine AS deps
-WORKDIR /app
+FROM base AS deps
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # ---- builder: generate the Prisma client and build the Next.js app ----
-FROM node:20-alpine AS builder
-WORKDIR /app
+FROM base AS builder
 RUN apk add --no-cache python3 make g++
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -35,9 +46,13 @@ ENV HOSTNAME=0.0.0.0
 ENV DATABASE_URL="file:/data/auto-tracker.db"
 ENV UPLOADS_DIR="/data/uploads"
 
-# su-exec drops root privileges after the entrypoint fixes up /data
-# ownership for the requested PUID/PGID (see docker-entrypoint.sh).
-RUN apk add --no-cache su-exec
+# Privilege drop (after the entrypoint fixes up /data ownership for the
+# requested PUID/PGID) uses busybox's built-in `su`, not the su-exec apk
+# package - see docker-entrypoint.sh. That avoids an extra apk fetch here
+# (busybox su already ships in the base image), which matters because some
+# build environments can't reach Alpine's package CDN (TLS-inspecting
+# corporate proxies, etc.) even though earlier apk installs above succeed
+# from Docker's build cache.
 
 # Next.js standalone server + static assets.
 COPY --from=builder /app/public ./public

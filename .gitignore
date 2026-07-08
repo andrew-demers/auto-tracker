@@ -49,3 +49,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# corporate/proxy root CA for Docker builds (see certs/README.md) - never commit
+/certs/*.crt
+/certs/*.pem
