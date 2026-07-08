@@ -18,12 +18,13 @@ import {
 import { formatMpg, formatUsd } from "@/lib/units";
 import type { MonthlyCostBucket, MpgTrendPoint } from "@/lib/vehicle-stats";
 
-// Categorical series colors from the validated dataviz reference palette
-// (slot 1 "blue" / slot 2 "aqua", fixed order - never reassigned per-chart).
-// Light/dark steps chosen for their respective chart surface.
+// Categorical series colors drawn from the app's restrained accent set
+// (lavender primary + the single semantic success green), per-theme so each
+// reads clearly against its own chart surface. Fixed order - never
+// reassigned per-chart.
 const SERIES_COLORS = {
-  fuel: { light: "#2a78d6", dark: "#3987e5" },
-  other: { light: "#1baf7a", dark: "#199e70" },
+  fuel: { light: "#5e6ad2", dark: "#828fff" },
+  other: { light: "#1e8e3a", dark: "#27a644" },
 } as const;
 
 function useSeriesColors() {

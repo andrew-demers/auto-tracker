@@ -18,7 +18,7 @@ export default async function EditVehiclePage({
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-[28px] font-semibold tracking-[-0.6px]">
           Edit {vehicle.name}
         </h1>
         <p className="text-sm text-muted-foreground">

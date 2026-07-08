@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-[28px] font-semibold tracking-[-0.6px]">
             Welcome back, {greetingName}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-[28px] font-semibold tracking-[-0.6px]">
           Welcome back, {greetingName}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -194,7 +194,7 @@ export default async function DashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {vehicles.slice(0, 6).map((vehicle) => (
             <Link key={vehicle.id} href={`/vehicles/${vehicle.id}`}>
-              <Card className="transition-shadow hover:shadow-md">
+              <Card className="transition-colors hover:bg-accent hover:ring-foreground/15">
                 <CardContent className="flex items-center justify-between py-4">
                   <div>
                     <p className="font-medium">{vehicle.name}</p>
