@@ -16,13 +16,15 @@ enum UserRole {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  passwordHash  String
-  role          UserRole @default(USER)
-  notifyEnabled Boolean  @default(true) // receive maintenance due/overdue emails
-  createdAt     DateTime @default(now())
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  name                String?
+  passwordHash        String
+  role                UserRole @default(USER)
+  notifyEnabled       Boolean  @default(true) // receive maintenance due/overdue emails
+  lastActiveVehicleId String?
+  lastActiveVehicle   Vehicle? @relation(fields: [lastActiveVehicleId], references: [id], onDelete: SetNull)
+  createdAt           DateTime @default(now())
 }
 
 enum FuelType {
@@ -34,20 +36,41 @@ enum FuelType {
 }
 
 model Vehicle {
-  id               String            @id @default(cuid())
-  name             String
-  make             String?
-  model            String?
-  year             Int?
-  fuelType         FuelType          @default(GASOLINE)
-  tankCapacity     Float? // gallons
-  photoUrl         String?
-  notes            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  fuelUps          FuelUp[]
-  expenses         Expense[]
-  maintenanceItems MaintenanceItem[]
+  id           String   @id @default(cuid())
+  name         String
+  make         String?
+  model        String?
+  year         Int?
+  fuelType     FuelType @default(GASOLINE)
+  tankCapacity Float? // gallons
+  photoUrl     String?
+  notes        String?
+
+  // Specs tab - all optional, filled in as the owner learns/looks them up.
+  vin                             String?
+  licensePlate                    String?
+  oilType                         String? // e.g. "0W-20 Full Synthetic"
+  oilCapacityQuarts               Float?
+  oilFilterPartNumber             String?
+  tireSize                        String? // e.g. "225/45R17" - front, or all four if not staggered
+  tireSizeRear                    String? // only set for staggered setups where rear differs from front
+  tirePressureFrontPsi            Float?
+  tirePressureRearPsi             Float?
+  transmissionFluidType           String?
+  transmissionFluidCapacityQuarts Float?
+  brakeFluidType                  String?
+  coolantType                     String?
+  batteryType                     String? // e.g. "Group 35 AGM"
+  sparkPlugType                   String?
+  wiperBladeSizeFront             String?
+  wiperBladeSizeRear              String?
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  fuelUps            FuelUp[]
+  expenses           Expense[]
+  maintenanceItems   MaintenanceItem[]
+  lastActiveForUsers User[]
 }
 
 model FuelUp {
@@ -71,10 +94,13 @@ model FuelUp {
 enum ExpenseCategory {
   MAINTENANCE
   REPAIR
+  MOD
   INSURANCE
   REGISTRATION
   PARKING_TOLLS
   ACCESSORIES
+  DETAILING
+  TIRES
   OTHER
 }
 
