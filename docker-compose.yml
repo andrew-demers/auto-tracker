@@ -1,7 +1,12 @@
 services:
   app:
-    build: .
-    image: auto-tracker:latest
+    # Pulls the image built by .github/workflows/docker-publish.yml on every
+    # push to main. To build locally from source instead (e.g. to use the
+    # certs/ corporate-proxy escape hatch), comment out `image:` and
+    # uncomment `build: .`.
+    image: ghcr.io/andrew-demers/auto-tracker:latest
+    # build: .
+    pull_policy: always
     restart: unless-stopped
     ports:
       - "3000:3000"

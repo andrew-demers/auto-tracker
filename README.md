@@ -132,19 +132,20 @@ There's no restore UI (a self-hosted single-instance app has limited blast radiu
 4. Replace the live database file and uploads directory in your `/data` volume with the extracted ones (e.g. for a named volume, `docker cp` into the volume's mountpoint or a temporary container; for a bind mount, copy directly onto the host path).
 5. Start the container again: `docker compose start app`.
 
+## Continuous deployment (GHCR)
+
+`.github/workflows/docker-publish.yml` builds and pushes a Docker image to the GitHub Container Registry (`ghcr.io/<owner>/<repo>`) on every push to `main`, tagged both `latest` and with the short commit SHA. `docker-compose.yml` pulls that `latest` image by default rather than building from source. The package is private by default - either make it public (repo's GitHub page > **Packages** > the package > **Package settings** > Change visibility) or configure a registry login (`docker login ghcr.io`) wherever you pull it.
+
 ## Running on Unraid
 
 Auto Tracker is a single container with all state under one `/data` path, which maps well to Unraid's Docker model:
 
-- **Bind-mount** `/data` to `/mnt/user/appdata/auto-tracker` (via the Unraid UI's Docker template, or by replacing the `auto-tracker-data` named volume in `docker-compose.yml` with a bind mount) rather than using the default named volume.
-- Prefer putting `/mnt/user/appdata/auto-tracker` on a **cache pool** share rather than the array - SQLite does frequent small writes and fsyncs, which the array's parity overhead handles poorly compared to a cache pool (SSD/NVMe).
-- Set `PUID=99` and `PGID=100` (Unraid's `nobody:users`, which is also this image's default) so files written under the bind-mounted appdata path are owned by what Unraid expects, keeping them readable/writable from the Unraid UI and other tools.
-- Set `APP_URL` to whatever URL you actually reverse-proxy the app behind (e.g. `https://auto-tracker.yourdomain.com` via Nginx Proxy Manager or SWAG) - it's used both for the Google OAuth redirect URI and for links in notification emails, so it needs to match what you (and Google) actually hit.
-
-## Project documentation
-
-- [`plans/`](./plans) - the original implementation plan for this project, including the full phase-by-phase spec and Prisma schema.
-- [`AGENTS.md`](./AGENTS.md) / [`CLAUDE.md`](./CLAUDE.md) - instructions read by AI coding agents (Claude Code, etc.) working in this repo. `CLAUDE.md` just points to `AGENTS.md` so both tools share one source of truth.
+1. **Bind-mount** `/data` to `/mnt/user/appdata/auto-tracker` (via the Unraid UI's Docker template's volume mappings, or by replacing the `auto-tracker-data` named volume in `docker-compose.yml` with a bind mount) rather than using a Docker-managed named volume - this is what lets Unraid's backup plugins and the UI's file browser see the database/uploads.
+2. Prefer putting `/mnt/user/appdata/auto-tracker` on a **cache pool** share rather than the array - SQLite does frequent small writes and fsyncs, which the array's parity overhead handles poorly compared to a cache pool (SSD/NVMe).
+3. Set `PUID=99` and `PGID=100` (Unraid's `nobody:users`, which is also this image's default) so files written under the bind-mounted appdata path are owned by what Unraid expects.
+4. Point the container at the published image, `ghcr.io/<owner>/<repo>:latest` (see above), instead of building locally.
+5. Put the container behind whatever reverse proxy you already run (Nginx Proxy Manager, SWAG, Traefik, etc.), proxying to the container's port 3000. Set `APP_URL` to the exact public URL you proxy it behind (e.g. `https://auto-tracker.yourdomain.com`) - it's used both for the Google OAuth redirect URI and for links in notification emails, so it must match what you (and Google) actually hit.
+6. To auto-update whenever a new image is published (rather than manually re-pulling), install **Watchtower** from Unraid's Community Applications and point it at this container - see the [Watchtower documentation](https://containrrr.dev/watchtower/) for scheduling/scope options.
 
 ## Learn more (Next.js)
 
