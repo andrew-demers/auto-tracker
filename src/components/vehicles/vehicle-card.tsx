@@ -34,7 +34,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
 
   return (
     <Link href={`/vehicles/${vehicle.id}`} className="group block">
-      <Card className="overflow-hidden py-0 transition-shadow group-hover:shadow-md">
+      <Card className="overflow-hidden py-0 transition-colors group-hover:bg-accent group-hover:ring-foreground/15">
         <div className="relative flex h-36 items-center justify-center bg-muted">
           {vehicle.photoUrl ? (
             <Image

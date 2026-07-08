@@ -79,11 +79,11 @@ export function ExpensesTable({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-dashed py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed py-10 text-center text-sm text-muted-foreground">
           No expenses match this filter.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
