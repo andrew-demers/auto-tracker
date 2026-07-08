@@ -53,3 +53,10 @@ next-env.d.ts
 # corporate/proxy root CA for Docker builds (see certs/README.md) - never commit
 /certs/*.crt
 /certs/*.pem
+
+# local-only markdown (planning docs, agent instructions) - keep any README.md
+*.md
+!README.md
+
+# Claude Code local settings/session data
+.claude
