@@ -44,6 +44,12 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# tzdata provides the zoneinfo database so the TZ env var (set below via
+# docker-compose) actually changes wall-clock time/date formatting and the
+# maintenance-reminder cron schedule - without it, TZ is silently ignored
+# and everything runs in UTC regardless of what's set.
+RUN apk add --no-cache tzdata
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
