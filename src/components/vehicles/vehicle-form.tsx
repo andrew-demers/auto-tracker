@@ -149,7 +149,11 @@ export function VehicleForm({ vehicleId, defaultValues }: VehicleFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fuel type</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select
+                  items={fuelTypeOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a fuel type" />
