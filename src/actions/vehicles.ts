@@ -79,13 +79,13 @@ export async function getVehicleOverviewStats(vehicleId: string) {
     }),
   ]);
 
-  const totalSpend =
-    fuelUps.reduce((sum, f) => sum + f.totalCost, 0) +
-    expenses.reduce((sum, e) => sum + e.cost, 0);
+  const fuelSpend = fuelUps.reduce((sum, f) => sum + f.totalCost, 0);
+  const totalSpend = fuelSpend + expenses.reduce((sum, e) => sum + e.cost, 0);
   const currentOdometer = getCurrentOdometer({ fuelUps, expenses });
 
   return {
     avgMpg: averageMpg(fuelUps),
+    fuelSpend,
     totalSpend,
     costPerMile: currentOdometer > 0 ? totalSpend / currentOdometer : null,
     monthlyCostSeries: buildMonthlyCostSeries(fuelUps, expenses),

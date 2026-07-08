@@ -191,9 +191,9 @@ export async function markCompleted(
           vehicleId: existing.vehicleId,
           date,
           category: "MAINTENANCE",
+          type: existing.title,
           odometer,
           cost,
-          notes: `Completed: ${existing.title}`,
         },
       });
     }
