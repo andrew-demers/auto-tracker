@@ -13,7 +13,7 @@ export default async function VehiclesPage() {
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Vehicles</h1>
+          <h1 className="text-[28px] font-semibold tracking-[-0.6px]">Vehicles</h1>
           <p className="text-sm text-muted-foreground">
             Your shared fleet - every user can see and manage all vehicles.
           </p>

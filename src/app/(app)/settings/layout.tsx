@@ -20,7 +20,7 @@ export default async function SettingsLayout({
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
+        <h1 className="text-[28px] font-semibold tracking-[-0.6px]">Settings</h1>
         <p className="text-sm text-muted-foreground">
           Manage your account{user.role === "ADMIN" ? " and users" : ""}.
         </p>

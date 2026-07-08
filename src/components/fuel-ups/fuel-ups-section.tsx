@@ -65,7 +65,7 @@ export async function FuelUpsSection({
           description="Log your first fill-up to start tracking MPG and fuel costs."
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
