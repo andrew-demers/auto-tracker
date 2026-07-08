@@ -36,6 +36,10 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       BACKUP_RETENTION_COUNT: ${BACKUP_RETENTION_COUNT:-14}
+      # IANA timezone (e.g. America/Chicago) - drives the maintenance-reminder
+      # cron's "8:00 AM" schedule and any server-rendered date/time text.
+      # Defaults to UTC if unset.
+      TZ: ${TZ:-UTC}
       # Unraid's default "nobody:users" - override to match your host if needed.
       PUID: ${PUID:-99}
       PGID: ${PGID:-100}

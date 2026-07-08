@@ -101,6 +101,7 @@ Fuel log columns: date\*, odometer\*, gallons\*, price/gallon, total cost (at le
 | `GOOGLE_CLIENT_ID` | *(unset)* | OAuth client ID for Google Drive backup. |
 | `GOOGLE_CLIENT_SECRET` | *(unset)* | OAuth client secret for Google Drive backup. |
 | `BACKUP_RETENTION_COUNT` | `14` | Number of most-recent backup archives to keep in Drive; older ones are deleted after each successful backup. |
+| `TZ` | `UTC` | (Docker only) IANA timezone (e.g. `America/Chicago`). Drives the maintenance-reminder cron's "8:00 AM" schedule and the daily backup's "3:00 AM" schedule. |
 | `PUID` | `99` | (Docker only) User ID the container runs as after fixing up `/data` ownership - Unraid's `nobody` user. |
 | `PGID` | `100` | (Docker only) Group ID the container runs as - Unraid's `users` group. |
 
