@@ -2,12 +2,13 @@ import { ClipboardList } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
-import { VehicleSpecsDialog } from "@/components/vehicles/vehicle-specs-dialog";
+import { VehicleSpecsDialog } from "@/components/vehicles/vehicle-specs-dialog-lazy";
 import type { VehicleSpecsFormValues } from "@/lib/validations/vehicle-specs";
 
 export interface VehicleSpecsData {
   vin: string | null;
   licensePlate: string | null;
+  tankCapacity: number | null;
   oilType: string | null;
   oilCapacityQuarts: number | null;
   oilFilterPartNumber: string | null;
@@ -35,6 +36,10 @@ const displayGroups: {
       { key: "vin", label: "VIN" },
       { key: "licensePlate", label: "License plate" },
     ],
+  },
+  {
+    title: "Fuel",
+    fields: [{ key: "tankCapacity", label: "Tank capacity", suffix: " gal" }],
   },
   {
     title: "Engine",

@@ -113,6 +113,18 @@ export function ImportMapWizard() {
   const targetFields = getTargetFields(stored.dataType);
   const mappedValues = new Set(Object.values(mapping).filter(Boolean));
 
+  // Passed as the column-mapping Select's `items` prop so the trigger shows
+  // the right label immediately, without requiring the popup to have been
+  // opened at least once first (Base UI only resolves Select.Value's label
+  // from the popup's mounted items unless `items` is provided).
+  const columnMapItems = [
+    { value: "__skip__", label: "Don't import" },
+    ...targetFields.map((field) => ({
+      value: field.key,
+      label: field.required ? `${field.label} *` : field.label,
+    })),
+  ];
+
   function setColumnMapping(colIndex: number, targetKey: string) {
     setMapping((prev) => ({ ...prev, [colIndex]: targetKey }));
   }
@@ -210,6 +222,7 @@ export function ImportMapWizard() {
           <div className="grid gap-2 sm:max-w-xs">
             <Label htmlFor="date-format">Date format</Label>
             <Select
+              items={DATE_FORMAT_OPTIONS}
               value={dateFormat}
               onValueChange={(v) => setDateFormat(v as DateFormatOption)}
             >
@@ -248,6 +261,7 @@ export function ImportMapWizard() {
                       </TableCell>
                       <TableCell>
                         <Select
+                          items={columnMapItems}
                           value={value || "__skip__"}
                           onValueChange={(v) =>
                             setColumnMapping(index, v === "__skip__" || v === null ? "" : v)

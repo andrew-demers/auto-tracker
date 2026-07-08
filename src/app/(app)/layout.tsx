@@ -1,7 +1,6 @@
 import { requireUser } from "@/lib/auth-guards";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { UserNav } from "@/components/user-nav";
 import { QuickFuelUpButton } from "@/components/fuel-ups/quick-fuel-up-button";
 import { getVehicleOptions } from "@/actions/vehicles";
@@ -28,7 +27,6 @@ export default async function AppLayout({
           </div>
           <div className="flex items-center gap-2">
             <QuickFuelUpButton vehicles={vehicles} defaultVehicleId={lastActiveVehicleId} />
-            <ThemeToggle />
             <UserNav user={user} />
           </div>
         </header>

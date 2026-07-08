@@ -171,7 +171,11 @@ export function AddUserDialog() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        items={userRoleOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue />

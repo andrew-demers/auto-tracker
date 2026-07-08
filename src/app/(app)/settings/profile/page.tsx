@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { ChangePasswordForm } from "@/components/settings/change-password-form";
+import { ThemeSettingsCard } from "@/components/settings/theme-settings-card";
 import { requireUser } from "@/lib/auth-guards";
 
 export default async function ProfileSettingsPage() {
@@ -27,6 +28,8 @@ export default async function ProfileSettingsPage() {
           <ChangePasswordForm />
         </CardContent>
       </Card>
+
+      <ThemeSettingsCard />
     </div>
   );
 }

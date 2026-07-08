@@ -12,9 +12,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/empty-state";
-import { MaintenanceDialog } from "@/components/maintenance/maintenance-dialog";
+import { MaintenanceDialog } from "@/components/maintenance/maintenance-dialog-lazy";
 import { DeleteMaintenanceItemButton } from "@/components/maintenance/delete-maintenance-item-button";
-import { MarkCompletedDialog } from "@/components/maintenance/mark-completed-dialog";
+import { MarkCompletedDialog } from "@/components/maintenance/mark-completed-dialog-lazy";
 import { getMaintenanceItems } from "@/actions/maintenance";
 import { formatMiles } from "@/lib/units";
 import type { MaintenanceStatus } from "@/lib/maintenance";
