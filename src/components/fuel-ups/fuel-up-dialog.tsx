@@ -35,7 +35,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { AttachmentFileInput } from "@/components/attachments/attachment-file-input";
-import { createFuelUp, updateFuelUp } from "@/actions/fuel-ups";
+import { FuelUpConfirmationDialog } from "@/components/fuel-ups/fuel-up-confirmation-dialog";
+import { createFuelUp, updateFuelUp, type FuelUpMpgSummary } from "@/actions/fuel-ups";
 import { getVehicle } from "@/actions/vehicles";
 import { uploadAttachment } from "@/actions/attachments";
 import {
@@ -99,6 +100,7 @@ export function FuelUpDialog({
   // manually-overridden total cost just by opening the dialog.
   const [totalCostTouched, setTotalCostTouched] = useState(isEditing);
   const [file, setFile] = useState<File | null>(null);
+  const [mpgSummary, setMpgSummary] = useState<FuelUpMpgSummary | null>(null);
 
   function initialVehicleId() {
     return vehicleId ?? defaultVehicleId ?? vehicles?.[0]?.id ?? "";
@@ -189,9 +191,10 @@ export function FuelUpDialog({
       return;
     }
     startTransition(async () => {
-      const result = isEditing
-        ? await updateFuelUp(fuelUp!.id, values)
-        : await createFuelUp(effectiveVehicleId, values);
+      const result: { error?: string; id?: string; mpgSummary?: FuelUpMpgSummary } =
+        isEditing
+          ? await updateFuelUp(fuelUp!.id, values)
+          : await createFuelUp(effectiveVehicleId, values);
 
       if (result.error) {
         setServerError(result.error);
@@ -212,243 +215,252 @@ export function FuelUpDialog({
 
       toast.success(isEditing ? "Fuel-up updated." : "Fuel-up added.");
       setOpen(false);
+      if (result.mpgSummary) setMpgSummary(result.mpgSummary);
     });
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {trigger ? (
-        // No children here (unlike the branch below) - `trigger` is a
-        // complete element that already carries its own visible content.
-        <DialogTrigger render={trigger} />
-      ) : (
-        <DialogTrigger
-          render={
-            isEditing ? (
-              <Button variant="ghost" size="icon-sm" aria-label="Edit fuel-up" />
-            ) : (
-              <Button size="sm" />
-            )
-          }
-        >
-          {isEditing ? (
-            <Pencil className="size-4" />
-          ) : (
-            <>
-              <Plus className="size-4" />
-              Add fuel-up
-            </>
-          )}
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit fuel-up" : "Add fuel-up"}</DialogTitle>
-          <DialogDescription>
-            Log an odometer reading and how much fuel went in.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="grid gap-4"
-            noValidate
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        {trigger ? (
+          // No children here (unlike the branch below) - `trigger` is a
+          // complete element that already carries its own visible content.
+          <DialogTrigger render={trigger} />
+        ) : (
+          <DialogTrigger
+            render={
+              isEditing ? (
+                <Button variant="ghost" size="icon-sm" aria-label="Edit fuel-up" />
+              ) : (
+                <Button size="sm" />
+              )
+            }
           >
-            {showVehiclePicker ? (
-              <FormItem>
-                <FormLabel>Vehicle</FormLabel>
-                <Select
-                  items={vehicles!.map((vehicle) => ({ value: vehicle.id, label: vehicle.name }))}
-                  value={selectedVehicleId}
-                  onValueChange={(value) => setSelectedVehicleId(value ?? "")}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a vehicle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicles!.map((vehicle) => (
-                      <SelectItem key={vehicle.id} value={vehicle.id}>
-                        {vehicle.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            ) : null}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="odometer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Odometer (mi)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.1"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="gallons"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Gallons</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.001"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pricePerGallon"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price/gallon</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.001"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="totalCost"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total cost</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.01"
-                        {...field}
-                        onChange={(event) => {
-                          setTotalCostTouched(true);
-                          field.onChange(event);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="station"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Station (optional)</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="-mt-2 flex flex-col gap-1">
-              {showOdometerWarning ? (
-                <p className="text-xs text-amber-600 dark:text-amber-500">
-                  Odometer is at or below the vehicle&apos;s current known odometer (
-                  {effectiveComparisonOdometer.toLocaleString()} mi).
-                </p>
-              ) : null}
-              {showPriceWarning ? (
-                <p className="text-xs text-amber-600 dark:text-amber-500">
-                  Price/gallon is unusually different from this vehicle&apos;s
-                  recent average (~${recentAvgPricePerGallon!.toFixed(2)}/gal) -
-                  double check the gallons and total.
-                </p>
-              ) : null}
-              <p className="text-xs text-muted-foreground">
-                Total cost is auto-calculated from gallons x price - edit it to override.
-              </p>
-            </div>
-
-            <FormField
-              control={form.control}
-              name="isFullTank"
-              render={({ field }) => (
+            {isEditing ? (
+              <Pencil className="size-4" />
+            ) : (
+              <>
+                <Plus className="size-4" />
+                Add fuel-up
+              </>
+            )}
+          </DialogTrigger>
+        )}
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{isEditing ? "Edit fuel-up" : "Add fuel-up"}</DialogTitle>
+            <DialogDescription>
+              Log an odometer reading and how much fuel went in.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="grid gap-4"
+              noValidate
+            >
+              {showVehiclePicker ? (
                 <FormItem>
-                  <label className="flex items-center gap-2 text-sm font-medium">
-                    <input
-                      type="checkbox"
-                      className="size-4 rounded border-input"
-                      checked={field.value}
-                      onChange={(event) => field.onChange(event.target.checked)}
-                    />
-                    Full tank
-                  </label>
-                  <FormMessage />
+                  <FormLabel>Vehicle</FormLabel>
+                  <Select
+                    items={vehicles!.map((vehicle) => ({ value: vehicle.id, label: vehicle.name }))}
+                    value={selectedVehicleId}
+                    onValueChange={(value) => setSelectedVehicleId(value ?? "")}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a vehicle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicles!.map((vehicle) => (
+                        <SelectItem key={vehicle.id} value={vehicle.id}>
+                          {vehicle.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </FormItem>
-              )}
-            />
+              ) : null}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="odometer"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Odometer (mi)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.1"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gallons"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gallons</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.001"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pricePerGallon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price/gallon</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.001"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="totalCost"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total cost</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          {...field}
+                          onChange={(event) => {
+                            setTotalCostTouched(true);
+                            field.onChange(event);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="station"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Station (optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="-mt-2 flex flex-col gap-1">
+                {showOdometerWarning ? (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    Odometer is at or below the vehicle&apos;s current known odometer (
+                    {effectiveComparisonOdometer.toLocaleString()} mi).
+                  </p>
+                ) : null}
+                {showPriceWarning ? (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    Price/gallon is unusually different from this vehicle&apos;s
+                    recent average (~${recentAvgPricePerGallon!.toFixed(2)}/gal) -
+                    double check the gallons and total.
+                  </p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">
+                  Total cost is auto-calculated from gallons x price - edit it to override.
+                </p>
+              </div>
 
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea rows={2} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="isFullTank"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className="flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-input"
+                        checked={field.value}
+                        onChange={(event) => field.onChange(event.target.checked)}
+                      />
+                      Full tank
+                    </label>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <AttachmentFileInput file={file} onChange={setFile} />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {serverError ? (
-              <p className="text-sm text-destructive">{serverError}</p>
-            ) : null}
+              <AttachmentFileInput file={file} onChange={setFile} />
 
-            <DialogFooter>
-              <Button type="submit" disabled={isPending}>
-                {isPending
-                  ? "Saving..."
-                  : isEditing
-                    ? "Save changes"
-                    : "Add fuel-up"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              {serverError ? (
+                <p className="text-sm text-destructive">{serverError}</p>
+              ) : null}
+
+              <DialogFooter>
+                <Button type="submit" disabled={isPending}>
+                  {isPending
+                    ? "Saving..."
+                    : isEditing
+                      ? "Save changes"
+                      : "Add fuel-up"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      <FuelUpConfirmationDialog
+        summary={mpgSummary}
+        onOpenChange={(next) => {
+          if (!next) setMpgSummary(null);
+        }}
+      />
+    </>
   );
 }

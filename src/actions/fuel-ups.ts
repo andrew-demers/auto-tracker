@@ -5,11 +5,21 @@ import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { deleteStoredFile } from "@/lib/storage";
 import { touchLastActiveVehicle } from "@/lib/last-active-vehicle";
+import { averageMpg, computeMpgSeries } from "@/lib/mpg";
 import {
   fuelUpDataSchema,
   type FuelUpData,
   type FuelUpFormParsed,
 } from "@/lib/validations/fuel-up";
+
+/** MPG context for the just-logged fuel-up, used to show a confirmation
+ * modal comparing it against the vehicle's history. Any field is null when
+ * there isn't enough history (or a full tank) to compute it. */
+export interface FuelUpMpgSummary {
+  mpg: number | null;
+  previousMpg: number | null;
+  averageMpg: number | null;
+}
 
 function toFuelUpData(parsed: FuelUpData) {
   return {
@@ -36,7 +46,7 @@ export async function getFuelUps(vehicleId: string) {
 export async function createFuelUp(
   vehicleId: string,
   values: FuelUpFormParsed
-): Promise<{ error?: string; id?: string }> {
+): Promise<{ error?: string; id?: string; mpgSummary?: FuelUpMpgSummary }> {
   const user = await requireUser();
 
   const parseResult = fuelUpDataSchema.safeParse(values);
@@ -54,8 +64,27 @@ export async function createFuelUp(
   });
   await touchLastActiveVehicle(user.id, vehicleId);
 
+  const fuelUpsAsc = await prisma.fuelUp.findMany({
+    where: { vehicleId },
+    orderBy: [{ date: "asc" }, { odometer: "asc" }],
+  });
+  const mpgSeries = computeMpgSeries(fuelUpsAsc);
+  const currentIndex = fuelUpsAsc.findIndex((f) => f.id === fuelUp.id);
+  const previousMpg =
+    mpgSeries
+      .slice(0, currentIndex)
+      .reverse()
+      .find((r) => r.mpg !== null && !r.suspect)?.mpg ?? null;
+
   revalidatePath(`/vehicles/${vehicleId}`);
-  return { id: fuelUp.id };
+  return {
+    id: fuelUp.id,
+    mpgSummary: {
+      mpg: mpgSeries[currentIndex]?.mpg ?? null,
+      previousMpg,
+      averageMpg: averageMpg(fuelUpsAsc.filter((f) => f.id !== fuelUp.id)),
+    },
+  };
 }
 
 export async function updateFuelUp(
