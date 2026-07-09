@@ -65,6 +65,11 @@ interface FuelUpDialogProps {
    * soft warning. Ignored (and recomputed automatically as the vehicle
    * selection changes) when `vehicles` is provided. */
   comparisonOdometer?: number;
+  /** This vehicle's average price/gallon over its last few fill-ups,
+   * excluding this record - used for a soft warning when the entered price
+   * looks like a typo. Omitted (no warning shown) for the vehicle-picker
+   * variant. */
+  recentAvgPricePerGallon?: number;
   fuelUp?: FuelUpDialogDefaults;
   /** When provided, renders a vehicle-select field and allows logging a
    * fuel-up for any of these vehicles - used by the global quick action. */
@@ -79,6 +84,7 @@ interface FuelUpDialogProps {
 export function FuelUpDialog({
   vehicleId,
   comparisonOdometer,
+  recentAvgPricePerGallon,
   fuelUp,
   vehicles,
   defaultVehicleId,
@@ -156,6 +162,14 @@ export function FuelUpDialog({
     odometer !== "" &&
     !Number.isNaN(odometerNum) &&
     odometerNum <= effectiveComparisonOdometer;
+
+  const pricePerGallonNum = Number(pricePerGallon);
+  const showPriceWarning =
+    pricePerGallon !== "" &&
+    !Number.isNaN(pricePerGallonNum) &&
+    recentAvgPricePerGallon != null &&
+    (pricePerGallonNum > recentAvgPricePerGallon * 2 ||
+      pricePerGallonNum < recentAvgPricePerGallon * 0.4);
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -370,6 +384,13 @@ export function FuelUpDialog({
                 <p className="text-xs text-amber-600 dark:text-amber-500">
                   Odometer is at or below the vehicle&apos;s current known odometer (
                   {effectiveComparisonOdometer.toLocaleString()} mi).
+                </p>
+              ) : null}
+              {showPriceWarning ? (
+                <p className="text-xs text-amber-600 dark:text-amber-500">
+                  Price/gallon is unusually different from this vehicle&apos;s
+                  recent average (~${recentAvgPricePerGallon!.toFixed(2)}/gal) -
+                  double check the gallons and total.
                 </p>
               ) : null}
               <p className="text-xs text-muted-foreground">

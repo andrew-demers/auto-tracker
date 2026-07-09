@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Fuel } from "lucide-react";
+import { Fuel, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/empty-state";
 import { FuelUpDialog } from "@/components/fuel-ups/fuel-up-dialog";
 import { DeleteFuelUpButton } from "@/components/fuel-ups/delete-fuel-up-button";
@@ -36,6 +37,7 @@ export async function FuelUpsSection({
   const fuelUpsAsc = await getFuelUps(vehicleId);
   const mpgSeries = computeMpgSeries(fuelUpsAsc);
   const mpgById = new Map(mpgSeries.map((r) => [r.fuelUp.id, r.mpg]));
+  const suspectById = new Map(mpgSeries.map((r) => [r.fuelUp.id, r.suspect]));
   const rowsDesc = [...fuelUpsAsc].reverse();
 
   function comparisonOdometerExcluding(excludeId: string | null) {
@@ -44,6 +46,18 @@ export async function FuelUpsSection({
       ...otherOdometerValues,
     ];
     return values.length > 0 ? Math.max(...values) : 0;
+  }
+
+  /** Average price/gallon over this vehicle's last 5 fill-ups (excluding the
+   * one being edited) - used for a soft warning on entries that look like a
+   * gallons/price typo (e.g. an extra or dropped digit). */
+  function recentAvgPricePerGallonExcluding(excludeId: string | null) {
+    const recent = fuelUpsAsc
+      .filter((f) => f.id !== excludeId)
+      .slice(-5)
+      .map((f) => f.pricePerGallon);
+    if (recent.length === 0) return undefined;
+    return recent.reduce((sum, v) => sum + v, 0) / recent.length;
   }
 
   return (
@@ -55,6 +69,7 @@ export async function FuelUpsSection({
         <FuelUpDialog
           vehicleId={vehicleId}
           comparisonOdometer={comparisonOdometerExcluding(null)}
+          recentAvgPricePerGallon={recentAvgPricePerGallonExcluding(null)}
         />
       </div>
 
@@ -99,7 +114,26 @@ export async function FuelUpsSection({
                     {formatUsd(fuelUp.totalCost)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatMpg(mpgById.get(fuelUp.id) ?? null)}
+                    <div className="flex items-center gap-1.5">
+                      {formatMpg(mpgById.get(fuelUp.id) ?? null)}
+                      {suspectById.get(fuelUp.id) ? (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <TriangleAlert
+                                className="size-3.5 text-amber-500"
+                                aria-label="Unusual MPG"
+                              />
+                            }
+                          />
+                          <TooltipContent>
+                            This MPG looks unusual next to this vehicle&apos;s
+                            other fill-ups - check for a missed fill-up or a
+                            gallons/price/total typo nearby.
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {fuelUp.isFullTank ? (
@@ -120,6 +154,7 @@ export async function FuelUpsSection({
                       <FuelUpDialog
                         vehicleId={vehicleId}
                         comparisonOdometer={comparisonOdometerExcluding(fuelUp.id)}
+                        recentAvgPricePerGallon={recentAvgPricePerGallonExcluding(fuelUp.id)}
                         fuelUp={{
                           id: fuelUp.id,
                           date: format(fuelUp.date, "yyyy-MM-dd"),

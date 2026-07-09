@@ -88,7 +88,7 @@ export function buildMpgTrend<T extends FuelUpLike & { date: Date }>(
 ): MpgTrendPoint[] {
   const cutoff = subMonths(new Date(), monthsToShow);
   return computeMpgSeries(fuelUpsAsc)
-    .filter((r): r is typeof r & { mpg: number } => r.mpg !== null)
+    .filter((r): r is typeof r & { mpg: number } => r.mpg !== null && !r.suspect)
     .filter((r) => r.fuelUp.date >= cutoff)
     .map((r) => ({
       date: r.fuelUp.date,
