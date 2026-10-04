@@ -24,6 +24,7 @@ import type { MonthlyCostBucket, MpgTrendPoint } from "@/lib/vehicle-stats";
 // reassigned per-chart.
 const SERIES_COLORS = {
   fuel: { light: "#5e6ad2", dark: "#828fff" },
+  maintenance: { light: "#c2410c", dark: "#f59e42" },
   other: { light: "#1e8e3a", dark: "#27a644" },
 } as const;
 
@@ -38,8 +39,18 @@ function useSeriesColors() {
   }, []);
 
   const mode = mounted && resolvedTheme === "dark" ? "dark" : "light";
-  return { fuel: SERIES_COLORS.fuel[mode], other: SERIES_COLORS.other[mode] };
+  return {
+    fuel: SERIES_COLORS.fuel[mode],
+    maintenance: SERIES_COLORS.maintenance[mode],
+    other: SERIES_COLORS.other[mode],
+  };
 }
+
+const COST_SERIES_LABELS: Record<string, string> = {
+  fuelCost: "Fuel",
+  maintenanceCost: "Maintenance",
+  otherCost: "Other expenses",
+};
 
 const axisTick = { fill: "var(--muted-foreground)", fontSize: 12 };
 const tooltipStyle = {
@@ -51,7 +62,7 @@ const tooltipStyle = {
 
 export function CostOverTimeChart({ data }: { data: MonthlyCostBucket[] }) {
   const colors = useSeriesColors();
-  const hasData = data.some((d) => d.fuelCost > 0 || d.otherCost > 0);
+  const hasData = data.some((d) => d.fuelCost > 0 || d.maintenanceCost > 0 || d.otherCost > 0);
 
   if (!hasData) {
     return (
@@ -83,14 +94,21 @@ export function CostOverTimeChart({ data }: { data: MonthlyCostBucket[] }) {
           contentStyle={tooltipStyle}
           formatter={(value, name) => [
             formatUsd(Number(value)),
-            name === "fuelCost" ? "Fuel" : "Other expenses",
+            COST_SERIES_LABELS[String(name)] ?? String(name),
           ]}
         />
         <Legend
-          formatter={(value: string) => (value === "fuelCost" ? "Fuel" : "Other expenses")}
+          formatter={(value: string) => COST_SERIES_LABELS[value] ?? value}
           wrapperStyle={{ fontSize: 12 }}
         />
         <Bar dataKey="fuelCost" stackId="cost" name="fuelCost" fill={colors.fuel} maxBarSize={24} />
+        <Bar
+          dataKey="maintenanceCost"
+          stackId="cost"
+          name="maintenanceCost"
+          fill={colors.maintenance}
+          maxBarSize={24}
+        />
         <Bar
           dataKey="otherCost"
           stackId="cost"

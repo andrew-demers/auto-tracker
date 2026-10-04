@@ -9,6 +9,7 @@ export interface MonthlyCostBucket {
   month: string; // "YYYY-MM", sortable
   label: string; // "Jan 2026"
   fuelCost: number;
+  maintenanceCost: number;
   otherCost: number;
 }
 
@@ -23,7 +24,7 @@ function monthLabel(date: Date): string {
 /** Buckets fuel-up + expense costs into monthly totals for the rolling last `monthsToShow` calendar months. */
 export function buildMonthlyCostSeries(
   fuelUps: { date: Date; totalCost: number }[],
-  expenses: { date: Date; cost: number }[],
+  expenses: { date: Date; cost: number; category: string }[],
   monthsToShow = 12
 ): MonthlyCostBucket[] {
   const cutoff = subMonths(new Date(), monthsToShow);
@@ -33,7 +34,7 @@ export function buildMonthlyCostSeries(
     const key = monthKey(date);
     let bucket = buckets.get(key);
     if (!bucket) {
-      bucket = { month: key, label: monthLabel(date), fuelCost: 0, otherCost: 0 };
+      bucket = { month: key, label: monthLabel(date), fuelCost: 0, maintenanceCost: 0, otherCost: 0 };
       buckets.set(key, bucket);
     }
     return bucket;
@@ -45,7 +46,9 @@ export function buildMonthlyCostSeries(
   }
   for (const expense of expenses) {
     if (expense.date < cutoff) continue;
-    getBucket(expense.date).otherCost += expense.cost;
+    const bucket = getBucket(expense.date);
+    if (expense.category === "MAINTENANCE") bucket.maintenanceCost += expense.cost;
+    else bucket.otherCost += expense.cost;
   }
 
   return [...buckets.values()].sort((a, b) => a.month.localeCompare(b.month));
