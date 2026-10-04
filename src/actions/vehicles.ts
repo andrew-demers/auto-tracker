@@ -75,7 +75,7 @@ export async function getVehicleOverviewStats(vehicleId: string) {
     prisma.expense.findMany({
       where: { vehicleId },
       orderBy: { date: "asc" },
-      select: { date: true, cost: true, odometer: true },
+      select: { date: true, cost: true, odometer: true, category: true },
     }),
   ]);
 
